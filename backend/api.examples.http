@@ -1,0 +1,63 @@
+### Register
+POST http://localhost:8080/api/auth/register
+Content-Type: application/json
+
+{
+  "login": "demo",
+  "password": "demo1234"
+}
+
+### Login
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "login": "demo",
+  "password": "demo1234"
+}
+
+### Refresh token
+POST http://localhost:8080/api/auth/refresh
+Content-Type: application/json
+
+{
+  "login": "demo",
+  "refreshToken": "{{refreshToken}}"
+}
+
+### Create group
+POST http://localhost:8080/api/groups
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Личное"
+}
+
+### Bulk create tasks
+POST http://localhost:8080/api/tasks/bulk
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "groupId": "{{groupId}}",
+  "titlesRaw": "Молоко.Фрукты.Овощи",
+  "description": "Купить сегодня"
+}
+
+### Complete task
+PATCH http://localhost:8080/api/tasks/{{taskId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "isCompleted": true
+}
+
+### History
+GET http://localhost:8080/api/tasks/{{taskId}}/history
+Authorization: Bearer {{token}}
+
+### Sync pull
+GET http://localhost:8080/api/sync/pull?since=2026-01-01T00:00:00.000Z
+Authorization: Bearer {{token}}
