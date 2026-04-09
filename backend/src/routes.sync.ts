@@ -30,7 +30,7 @@ syncRouter.post("/push", async (req: AuthedRequest, res) => {
           .union([z.boolean(), z.literal(0), z.literal(1)])
           .transform((v) => v === true || v === 1),
         priority: z.enum(["low", "medium", "high"]),
-        order: z.number().int(),
+        order: z.coerce.number(),
         // Dart/JS отдают разные ISO-строки; z.string().datetime() часто режет валидные даты
         updated_at: z.string().min(1),
         deleted_at: z.union([z.string().min(1), z.null()]).optional()

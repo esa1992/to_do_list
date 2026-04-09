@@ -11,7 +11,7 @@ create table if not exists groups (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references users(id) on delete cascade,
   name text not null,
-  "order" int not null default 0
+  "order" bigint not null default 0
 );
 
 create table if not exists tasks (
@@ -21,7 +21,7 @@ create table if not exists tasks (
   description text,
   is_completed boolean not null default false,
   priority text not null check (priority in ('low','medium','high')) default 'low',
-  "order" int not null default 0,
+  "order" bigint not null default 0,
   deadline timestamptz null,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
