@@ -26,7 +26,9 @@ syncRouter.post("/push", async (req: AuthedRequest, res) => {
         group_id: z.string().uuid(),
         title: z.string(),
         description: z.string().nullable().optional(),
-        is_completed: z.boolean(),
+        is_completed: z
+          .union([z.boolean(), z.literal(0), z.literal(1)])
+          .transform((v) => v === true || v === 1),
         priority: z.enum(["low", "medium", "high"]),
         order: z.number().int(),
         updated_at: z.string().datetime(),
