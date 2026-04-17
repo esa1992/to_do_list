@@ -27,6 +27,10 @@ jobs:
       - name: Enable Windows Desktop
         run: flutter config --enable-windows-desktop
 
+      - name: Ensure Windows Platform Files
+        working-directory: frontend
+        run: flutter create . --platforms=windows
+
       - name: Get Dependencies
         working-directory: frontend
         run: flutter pub get
