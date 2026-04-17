@@ -1,5 +1,5 @@
 import "package:flutter/foundation.dart";
-import "package:flutter_secure_storage/flutter_secure_storage.dart";
+import "package:shared_preferences/shared_preferences.dart";
 import "api_client.dart";
 import "proxy_settings.dart";
 
@@ -7,7 +7,6 @@ class AuthStore extends ChangeNotifier {
   static const _tokenKey = "auth_token";
   static const _refreshTokenKey = "refresh_token";
   static const _loginKey = "login";
-  final _storage = const FlutterSecureStorage();
   final proxyStore = ProxySettingsStore();
 
   String? token;
@@ -18,10 +17,29 @@ class AuthStore extends ChangeNotifier {
 
   AuthStore({required this.baseUrl});
 
+  Future<void> _save(String key, String? value) async {
+    final prefs = await SharedPreferences.getInstance();
+    if (value == null) {
+      await prefs.remove(key);
+    } else {
+      await prefs.setString(key, value);
+    }
+  }
+
+  Future<String?> _read(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(key);
+  }
+
+  Future<void> _delete(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(key);
+  }
+
   Future<void> init() async {
-    token = await _storage.read(key: _tokenKey);
-    refreshToken = await _storage.read(key: _refreshTokenKey);
-    login = await _storage.read(key: _loginKey);
+    token = await _read(_tokenKey);
+    refreshToken = await _read(_refreshTokenKey);
+    login = await _read(_loginKey);
     proxy = await proxyStore.load();
     notifyListeners();
   }
@@ -32,9 +50,9 @@ class AuthStore extends ChangeNotifier {
     token = data["token"] as String;
     refreshToken = data["refreshToken"] as String?;
     login = (data["user"] as Map<String, dynamic>)["login"] as String;
-    await _storage.write(key: _tokenKey, value: token);
-    await _storage.write(key: _refreshTokenKey, value: refreshToken);
-    await _storage.write(key: _loginKey, value: login);
+    await _save(_tokenKey, token);
+    await _save(_refreshTokenKey, refreshToken);
+    await _save(_loginKey, login);
     notifyListeners();
   }
 
@@ -44,9 +62,9 @@ class AuthStore extends ChangeNotifier {
     token = data["token"] as String;
     refreshToken = data["refreshToken"] as String?;
     login = (data["user"] as Map<String, dynamic>)["login"] as String;
-    await _storage.write(key: _tokenKey, value: token);
-    await _storage.write(key: _refreshTokenKey, value: refreshToken);
-    await _storage.write(key: _loginKey, value: login);
+    await _save(_tokenKey, token);
+    await _save(_refreshTokenKey, refreshToken);
+    await _save(_loginKey, login);
     notifyListeners();
   }
 
@@ -56,8 +74,8 @@ class AuthStore extends ChangeNotifier {
     final data = await api.post("/api/auth/refresh", {"login": login, "refreshToken": refreshToken});
     token = data["token"] as String;
     refreshToken = data["refreshToken"] as String?;
-    await _storage.write(key: _tokenKey, value: token);
-    await _storage.write(key: _refreshTokenKey, value: refreshToken);
+    await _save(_tokenKey, token);
+    await _save(_refreshTokenKey, refreshToken);
     notifyListeners();
   }
 
@@ -70,9 +88,9 @@ class AuthStore extends ChangeNotifier {
       final api = ApiClient(baseUrl: baseUrl, proxySettings: proxy);
       await api.post("/api/auth/logout", {"login": currentLogin});
     }
-    await _storage.delete(key: _tokenKey);
-    await _storage.delete(key: _refreshTokenKey);
-    await _storage.delete(key: _loginKey);
+    await _delete(_tokenKey);
+    await _delete(_refreshTokenKey);
+    await _delete(_loginKey);
     notifyListeners();
   }
 

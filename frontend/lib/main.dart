@@ -4,6 +4,11 @@ import "core/auth_store.dart";
 import "screens/login_screen.dart";
 import "screens/tasks_screen.dart";
 
+const apiBaseUrl = String.fromEnvironment(
+  "API_BASE_URL",
+  defaultValue: "https://to-do-list-backend-yrwf.onrender.com",
+);
+
 void main() {
   runApp(const RootApp());
 }
@@ -15,7 +20,7 @@ class RootApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
       create: (_) {
-        final store = AuthStore(baseUrl: "http://localhost:8080");
+        final store = AuthStore(baseUrl: apiBaseUrl);
         store.init().then((_) => store.refreshSessionIfNeeded());
         return store;
       },
