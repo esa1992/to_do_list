@@ -39,9 +39,24 @@ jobs:
         working-directory: frontend
         run: flutter build windows --release --dart-define=API_BASE_URL=https://to-do-list-backend-yrwf.onrender.com
 
+      - name: Create Portable ZIP
+        shell: pwsh
+        run: |
+          $releaseDir = "frontend/build/windows/x64/runner/Release"
+          $zipPath = "frontend/build/windows/x64/runner/cross_todo-portable-win64.zip"
+          if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
+          Compress-Archive -Path "$releaseDir\*" -DestinationPath $zipPath
+
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
         with:
           name: cross_todo-windows-release
           path: frontend/build/windows/x64/runner/Release
+          if-no-files-found: error
+
+      - name: Upload Windows Portable ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: cross_todo-portable-win64
+          path: frontend/build/windows/x64/runner/cross_todo-portable-win64.zip
           if-no-files-found: error
