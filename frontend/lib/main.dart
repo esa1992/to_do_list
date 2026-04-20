@@ -1,5 +1,8 @@
 import "package:flutter/material.dart";
+import "package:flutter/foundation.dart";
 import "package:provider/provider.dart";
+import "package:sqflite/sqflite.dart";
+import "package:sqflite_common_ffi/sqflite_ffi.dart";
 import "core/auth_store.dart";
 import "screens/login_screen.dart";
 import "screens/tasks_screen.dart";
@@ -10,6 +13,12 @@ const apiBaseUrl = String.fromEnvironment(
 );
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Windows/Linux need explicit FFI initialization for sqflite.
+  if (!kIsWeb && (defaultTargetPlatform == TargetPlatform.windows || defaultTargetPlatform == TargetPlatform.linux)) {
+    sqfliteFfiInit();
+    databaseFactory = databaseFactoryFfi;
+  }
   runApp(const RootApp());
 }
 
