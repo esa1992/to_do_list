@@ -35,6 +35,10 @@ jobs:
         working-directory: frontend
         run: flutter pub get
 
+      - name: Apply Custom Windows App Icon
+        working-directory: frontend
+        run: dart run flutter_launcher_icons --file flutter_launcher_icons_windows.yaml
+
       - name: Build Windows Release
         working-directory: frontend
         run: flutter build windows --release --dart-define=API_BASE_URL=https://to-do-list-backend-yrwf.onrender.com

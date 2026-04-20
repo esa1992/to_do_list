@@ -80,6 +80,21 @@ flutter run -d macos
 flutter run -d windows
 ```
 
+## Иконки приложения (Android / iOS / macOS / Windows)
+
+Единый источник иконки: `frontend/assets/icon/app_icon_1024.png`.
+
+Для генерации платформенных иконок локально:
+
+```bash
+cd frontend
+flutter pub get
+dart run flutter_launcher_icons
+```
+
+Для Windows в CI используется отдельный конфиг:
+`frontend/flutter_launcher_icons_windows.yaml`.
+
 ## 3) Схема API (кратко)
 
 ### Auth
