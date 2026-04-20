@@ -6,12 +6,14 @@ class ProxySettings {
   final int port;
   final String? login;
   final String? password;
+  final bool insecureTlsProxyMode;
 
   const ProxySettings({
     required this.ip,
     required this.port,
     this.login,
     this.password,
+    this.insecureTlsProxyMode = false,
   });
 
   bool get isEnabled => ip.isNotEmpty && port > 0;
@@ -28,6 +30,7 @@ class ProxySettings {
         "port": port,
         "login": login,
         "password": password,
+        "insecureTlsProxyMode": insecureTlsProxyMode,
       };
 
   factory ProxySettings.fromJson(Map<String, dynamic> json) {
@@ -36,6 +39,7 @@ class ProxySettings {
       port: (json["port"] ?? 0) as int,
       login: json["login"] as String?,
       password: json["password"] as String?,
+      insecureTlsProxyMode: (json["insecureTlsProxyMode"] ?? false) as bool,
     );
   }
 }

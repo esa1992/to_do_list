@@ -20,6 +20,11 @@ class ApiClient {
     client.connectionTimeout = const Duration(seconds: 45);
     if (proxySettings.isEnabled) {
       client.findProxy = (_) => proxySettings.asProxyDirective();
+      if (proxySettings.insecureTlsProxyMode) {
+        // Compatibility mode for corporate proxies that break revocation checks.
+        // Security is reduced: any certificate is accepted while proxy is enabled.
+        client.badCertificateCallback = (_cert, _host, _port) => true;
+      }
     }
     return IOClient(client);
   }

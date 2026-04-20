@@ -15,6 +15,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late final TextEditingController portCtrl;
   late final TextEditingController loginCtrl;
   late final TextEditingController passCtrl;
+  bool insecureTlsProxyMode = false;
 
   @override
   void initState() {
@@ -24,6 +25,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     portCtrl = TextEditingController(text: proxy.port == 0 ? "" : proxy.port.toString());
     loginCtrl = TextEditingController(text: proxy.login ?? "");
     passCtrl = TextEditingController(text: proxy.password ?? "");
+    insecureTlsProxyMode = proxy.insecureTlsProxyMode;
   }
 
   @override
@@ -39,6 +41,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
             TextField(controller: portCtrl, decoration: const InputDecoration(labelText: "Port")),
             TextField(controller: loginCtrl, decoration: const InputDecoration(labelText: "Login")),
             TextField(controller: passCtrl, decoration: const InputDecoration(labelText: "Password")),
+            const SizedBox(height: 8),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              title: const Text("Режим совместимости TLS"),
+              subtitle: const Text(
+                "Использовать только в корпоративных прокси-сетях,\nгде обычная TLS-проверка не проходит.",
+              ),
+              value: insecureTlsProxyMode,
+              onChanged: (v) => setState(() => insecureTlsProxyMode = v),
+            ),
+            if (insecureTlsProxyMode)
+              const Text(
+                "Внимание: в этом режиме проверка сертификатов ослабляется.",
+                style: TextStyle(color: Colors.orangeAccent, fontSize: 12),
+              ),
           ],
         ),
       ),
@@ -53,6 +70,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 port: int.tryParse(portCtrl.text.trim()) ?? 0,
                 login: loginCtrl.text.trim().isEmpty ? null : loginCtrl.text.trim(),
                 password: passCtrl.text.trim().isEmpty ? null : passCtrl.text.trim(),
+                insecureTlsProxyMode: insecureTlsProxyMode,
               ),
             );
             if (context.mounted) Navigator.pop(context);

@@ -28,6 +28,11 @@ class _LoginScreenState extends State<LoginScreen> {
         lower.contains("operation not permitted")) {
       return "Сетевая ошибка. Если вы работаете через прокси, сначала откройте 'Сеть / Прокси' и сохраните настройки.";
     }
+    if (lower.contains("certificate_verify_failed") ||
+        lower.contains("handshakeexception") ||
+        lower.contains("crypt_e_no_revocation_check")) {
+      return "TLS/сертификат не прошел проверку через прокси. Включите 'Режим совместимости TLS' в 'Сеть / Прокси'.";
+    }
     return msg;
   }
 
