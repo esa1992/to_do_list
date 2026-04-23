@@ -48,8 +48,13 @@ jobs:
         run: |
           $releaseDir = "frontend/build/windows/x64/runner/Release"
           $zipPath = "frontend/build/windows/x64/runner/cross_todo-portable-win64.zip"
+          $portableDir = "frontend/build/windows/x64/runner/portable"
           if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
-          Compress-Archive -Path "$releaseDir\*" -DestinationPath $zipPath
+          if (Test-Path $portableDir) { Remove-Item $portableDir -Recurse -Force }
+          New-Item -ItemType Directory -Path $portableDir | Out-Null
+          Copy-Item "$releaseDir\*" -Destination $portableDir -Recurse -Force
+          Copy-Item "README_USER_WINDOWS.txt" -Destination "$portableDir\README_USER_WINDOWS.txt" -Force
+          Compress-Archive -Path "$portableDir\*" -DestinationPath $zipPath
 
       - name: Upload Windows Artifact
         uses: actions/upload-artifact@v4
