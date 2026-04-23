@@ -1,4 +1,5 @@
 import "dart:convert";
+import "package:flutter/foundation.dart";
 import "package:shared_preferences/shared_preferences.dart";
 import "package:uuid/uuid.dart";
 import "../models/models.dart";
@@ -9,19 +10,24 @@ import "local_db.dart";
 class SyncService {
   final LocalDb localDb;
   final AuthStore authStore;
-  static const _checkpointKey = "sync_checkpoint_v1";
+  static const _checkpointKeyPrefix = "sync_checkpoint_v1";
   static const _uuid = Uuid();
 
   SyncService({required this.localDb, required this.authStore});
 
+  String _checkpointKey() {
+    final userScope = authStore.login ?? "anonymous";
+    return "${_checkpointKeyPrefix}_$userScope";
+  }
+
   Future<String> _checkpoint() async {
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_checkpointKey) ?? DateTime.fromMillisecondsSinceEpoch(0).toIso8601String();
+    return prefs.getString(_checkpointKey()) ?? DateTime.fromMillisecondsSinceEpoch(0).toIso8601String();
   }
 
   Future<void> _saveCheckpoint(String value) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_checkpointKey, value);
+    await prefs.setString(_checkpointKey(), value);
   }
 
   ApiClient _api() => ApiClient(
@@ -166,14 +172,24 @@ class SyncService {
       }
     }
 
+    // If local cache is empty, force full bootstrap pull from epoch.
+    final localAll = await localDb.listTasks(filter: "all", q: "");
     final checkpoint = await _checkpoint();
-    final pull = await _retryTransient(() => _api().getMap("/api/sync/pull?since=$checkpoint"));
+    final effectiveSince = localAll.isEmpty ? DateTime.fromMillisecondsSinceEpoch(0).toIso8601String() : checkpoint;
+    if (kDebugMode) {
+      debugPrint(
+        "[SYNC] checkpoint=$checkpoint effectiveSince=$effectiveSince localCount=${localAll.length} user=${authStore.login}",
+      );
+    }
+    final pull = await _retryTransient(() => _api().getMap("/api/sync/pull?since=$effectiveSince"));
     final serverTasks = (pull["tasks"] as List<dynamic>? ?? [])
         .map((e) => TaskItem.fromJson(e as Map<String, dynamic>))
         .toList();
+    if (kDebugMode) {
+      debugPrint("[SYNC] pull received tasks=${serverTasks.length}");
+    }
 
     // LWW: принимаем запись с более новым updatedAt
-    final localAll = await localDb.listTasks(filter: "all", q: "");
     final localMap = {for (final t in localAll) t.id: t};
     for (final st in serverTasks) {
       final lt = localMap[st.id];
