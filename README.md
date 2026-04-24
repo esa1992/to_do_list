@@ -139,3 +139,32 @@ dart run flutter_launcher_icons
 ## 5) Примеры API
 
 Смотри файл `backend/api.examples.http` — готовые HTTP-запросы для тестирования.
+
+## 6) Публикация сборок (Windows / macOS / Android / iOS)
+
+В репозитории настроены workflow:
+
+- `build-windows.yml` — Windows release + portable zip
+- `release-platforms.yml` — Android APK, macOS zip, iOS -> TestFlight
+
+### Как запускать
+
+1. Создать git tag версии, например `v1.0.0`
+2. Запушить тег в GitHub
+3. Открыть вкладку `Actions` и дождаться завершения jobs
+4. Скачать артефакты в `Artifacts`
+
+### Последовательность для iOS (TestFlight)
+
+1. Создать приложение в App Store Connect (bundle id должен совпадать с iOS проектом)
+2. Создать App Store Connect API Key
+3. Добавить в GitHub repository secrets:
+   - `APP_STORE_CONNECT_ISSUER_ID`
+   - `APP_STORE_CONNECT_KEY_ID`
+   - `APP_STORE_CONNECT_PRIVATE_KEY` (содержимое `.p8`)
+4. Запустить workflow `Release Platforms` (tag или `workflow_dispatch`)
+5. Готовая сборка автоматически отправится в TestFlight
+
+### Примечание
+
+Если iOS secrets не заданы, job `iOS and Upload to TestFlight` будет автоматически пропущен.

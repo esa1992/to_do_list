@@ -1,0 +1,104 @@
+name: Release Platforms
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Get Dependencies
+        working-directory: frontend
+        run: flutter pub get
+
+      - name: Build Android Release APK
+        working-directory: frontend
+        run: flutter build apk --release --dart-define=API_BASE_URL=https://to-do-list-backend-yrwf.onrender.com
+
+      - name: Upload Android Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cross_todo-android-apk
+          path: frontend/build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+
+  macos:
+    name: Build macOS App
+    runs-on: macos-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Get Dependencies
+        working-directory: frontend
+        run: flutter pub get
+
+      - name: Build macOS Release
+        working-directory: frontend
+        run: flutter build macos --release --dart-define=API_BASE_URL=https://to-do-list-backend-yrwf.onrender.com
+
+      - name: Zip macOS app bundle
+        shell: bash
+        run: |
+          cd frontend/build/macos/Build/Products/Release
+          ditto -c -k --sequesterRsrc --keepParent cross_todo.app cross_todo-macos.zip
+
+      - name: Upload macOS Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cross_todo-macos-app
+          path: frontend/build/macos/Build/Products/Release/cross_todo-macos.zip
+          if-no-files-found: error
+
+  ios_testflight:
+    name: Build iOS and Upload to TestFlight
+    runs-on: macos-latest
+    if: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID != '' && secrets.APP_STORE_CONNECT_KEY_ID != '' && secrets.APP_STORE_CONNECT_PRIVATE_KEY != '' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Get Dependencies
+        working-directory: frontend
+        run: flutter pub get
+
+      - name: Ensure iOS Platform Files
+        working-directory: frontend
+        run: flutter create . --platforms=ios
+
+      - name: Build iOS IPA
+        working-directory: frontend
+        run: flutter build ipa --release --dart-define=API_BASE_URL=https://to-do-list-backend-yrwf.onrender.com
+
+      - name: Upload to TestFlight
+        uses: apple-actions/upload-testflight-build@v1
+        with:
+          app-path: frontend/build/ios/ipa/*.ipa
+          issuer-id: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          api-key-id: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          api-private-key: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
