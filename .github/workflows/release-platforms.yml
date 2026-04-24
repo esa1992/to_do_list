@@ -72,30 +72,51 @@ jobs:
   ios_testflight:
     name: Build iOS and Upload to TestFlight
     runs-on: macos-latest
-    if: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID != '' && secrets.APP_STORE_CONNECT_KEY_ID != '' && secrets.APP_STORE_CONNECT_PRIVATE_KEY != '' }}
     steps:
+      - name: Check TestFlight Secrets
+        id: tf_secrets
+        shell: bash
+        env:
+          TF_ISSUER: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          TF_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          TF_PRIVATE_KEY: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+        run: |
+          if [[ -n "$TF_ISSUER" && -n "$TF_KEY_ID" && -n "$TF_PRIVATE_KEY" ]]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+            echo "TestFlight secrets found."
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "TestFlight secrets are missing. iOS upload steps will be skipped."
+          fi
+
       - name: Checkout
+        if: steps.tf_secrets.outputs.enabled == 'true'
         uses: actions/checkout@v4
 
       - name: Setup Flutter
+        if: steps.tf_secrets.outputs.enabled == 'true'
         uses: subosito/flutter-action@v2
         with:
           channel: stable
           cache: true
 
       - name: Get Dependencies
+        if: steps.tf_secrets.outputs.enabled == 'true'
         working-directory: frontend
         run: flutter pub get
 
       - name: Ensure iOS Platform Files
+        if: steps.tf_secrets.outputs.enabled == 'true'
         working-directory: frontend
         run: flutter create . --platforms=ios
 
       - name: Build iOS IPA
+        if: steps.tf_secrets.outputs.enabled == 'true'
         working-directory: frontend
         run: flutter build ipa --release --dart-define=API_BASE_URL=https://to-do-list-backend-yrwf.onrender.com
 
       - name: Upload to TestFlight
+        if: steps.tf_secrets.outputs.enabled == 'true'
         uses: apple-actions/upload-testflight-build@v1
         with:
           app-path: frontend/build/ios/ipa/*.ipa
