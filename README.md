@@ -168,3 +168,46 @@ dart run flutter_launcher_icons
 ### Примечание
 
 Если iOS secrets не заданы, job `iOS and Upload to TestFlight` будет автоматически пропущен.
+
+## 7) Сайт-визитка проекта
+
+Добавлен статический лендинг в каталоге `site`:
+
+- `site/index.html`
+- `site/styles.css`
+- `site/script.js`
+
+### Локальный просмотр
+
+Открой `site/index.html` в браузере или подними простой сервер:
+
+```bash
+cd site
+python3 -m http.server 8081
+```
+
+После этого страница будет доступна на `http://localhost:8081`.
+
+### Что настроить перед публикацией
+
+В `site/script.js` обнови ссылки в объекте `LINKS`:
+
+- `windows`
+- `macos`
+- `android`
+- `iosTestFlight`
+
+По умолчанию сайт пытается подтянуть актуальные файлы автоматически из
+`GitHub Releases API` (`/releases/latest`), а если API недоступен — использует fallback-ссылки из `LINKS`.
+
+### Автодеплой сайта
+
+Добавлен workflow `.github/workflows/deploy-site.yml`:
+
+- деплой на GitHub Pages при пуше в `main`, если изменились файлы в `site/**`
+- также можно запускать вручную через `workflow_dispatch`
+
+Перед первым деплоем включи Pages в настройках репозитория:
+
+1. `Settings` -> `Pages`
+2. `Build and deployment` -> `Source: GitHub Actions`

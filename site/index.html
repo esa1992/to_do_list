@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cross Todo — задачи на всех устройствах</title>
+    <meta
+      name="description"
+      content="Cross Todo — минималистичное приложение для задач с синхронизацией между устройствами, офлайн-режимом и прокси-поддержкой."
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <nav class="nav container">
+        <div class="brand">
+          <div class="dot"></div>
+          <span>Cross Todo</span>
+        </div>
+        <a class="ghost-btn" href="#downloads">Скачать</a>
+      </nav>
+      <section class="hero-content container">
+        <div class="hero-text">
+          <h1>Управляйте задачами на всех устройствах</h1>
+          <p>
+            Минималистичный todo с синхронизацией, офлайн-режимом и прокси-настройками.
+            Добавляйте задачи за пару кликов и продолжайте работу где угодно.
+          </p>
+          <div class="hero-actions">
+            <a class="primary-btn" href="#downloads">Скачать приложение</a>
+            <a class="ghost-btn" href="#features">Как это работает</a>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="mock-card">
+            <h3>Сегодня</h3>
+            <ul>
+              <li><input type="checkbox" checked /> Подготовить релиз</li>
+              <li><input type="checkbox" checked /> Проверить синхронизацию</li>
+              <li><input type="checkbox" /> Ответить в чате</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </header>
+
+    <main>
+      <section id="features" class="section container">
+        <h2>Почему удобно</h2>
+        <div class="grid">
+          <article class="card">
+            <h3>Быстрый старт</h3>
+            <p>Создавайте задачи через форму или массово через разделитель.</p>
+          </article>
+          <article class="card">
+            <h3>Синхронизация</h3>
+            <p>Автообновление и ручной refresh, чтобы изменения были видны на всех устройствах.</p>
+          </article>
+          <article class="card">
+            <h3>Оффлайн-режим</h3>
+            <p>Работает без сети, изменения отправляются при восстановлении подключения.</p>
+          </article>
+          <article class="card">
+            <h3>Прокси-сети</h3>
+            <p>Настройка прокси прямо на экране входа, включая режим совместимости TLS.</p>
+          </article>
+        </div>
+      </section>
+
+      <section id="downloads" class="section container">
+        <div class="downloads-panel">
+          <div class="downloads-head">
+            <h2>Скачать Cross Todo</h2>
+            <span class="downloads-badge">Доступно сейчас</span>
+          </div>
+          <p class="muted">
+            Выберите платформу. Для iOS публикация идёт через TestFlight.
+          </p>
+          <p class="muted" id="release-info">Загрузка данных о последнем релизе...</p>
+          <div class="downloads-grid">
+            <a class="download-card" id="win-link" href="#" target="_blank" rel="noopener noreferrer">
+              <strong>Windows</strong>
+              <span>Portable ZIP</span>
+            </a>
+            <a class="download-card" id="mac-link" href="#" target="_blank" rel="noopener noreferrer">
+              <strong>macOS</strong>
+              <span>Release ZIP</span>
+            </a>
+            <a class="download-card" id="android-link" href="#" target="_blank" rel="noopener noreferrer">
+              <strong>Android</strong>
+              <span>APK</span>
+            </a>
+            <a class="download-card disabled" id="ios-link" href="#" aria-disabled="true">
+              <strong>iOS</strong>
+              <span>TestFlight (скоро)</span>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer container">
+      <p>© <span id="year"></span> Cross Todo</p>
+    </footer>
+
+    <script src="./script.js"></script>
+  </body>
+</html>
