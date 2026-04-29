@@ -145,14 +145,17 @@ dart run flutter_launcher_icons
 В репозитории настроены workflow:
 
 - `build-windows.yml` — Windows release + portable zip
-- `release-platforms.yml` — Android APK, macOS zip, iOS -> TestFlight
+- `release-platforms.yml` — Windows portable zip, Android APK, macOS zip, iOS -> TestFlight, публикация GitHub Release
 
 ### Как запускать
 
 1. Создать git tag версии, например `v1.0.0`
 2. Запушить тег в GitHub
-3. Открыть вкладку `Actions` и дождаться завершения jobs
-4. Скачать артефакты в `Artifacts`
+3. Открыть вкладку `Actions` и дождаться завершения `Release Platforms`
+4. Готовые файлы появятся в `Releases` как assets:
+   - `cross_todo-portable-win64.zip`
+   - `cross_todo-macos.zip`
+   - `app-release.apk`
 
 ### Последовательность для iOS (TestFlight)
 
@@ -198,7 +201,7 @@ python3 -m http.server 8081
 - `iosTestFlight`
 
 По умолчанию сайт пытается подтянуть актуальные файлы автоматически из
-`GitHub Releases API` (`/releases/latest`), а если API недоступен — использует fallback-ссылки из `LINKS`.
+`GitHub Releases API` (`/releases/latest`). Если Release ещё не опубликован, кнопки скачивания будут неактивны. После публикации тега `v*` workflow `release-platforms.yml` создаст GitHub Release, и сайт автоматически начнёт вести на прямые ссылки скачивания.
 
 ### Автодеплой сайта
 

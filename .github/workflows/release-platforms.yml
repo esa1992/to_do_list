@@ -6,7 +6,63 @@ on:
     tags:
       - "v*"
 
+permissions:
+  contents: write
+  actions: read
+
 jobs:
+  windows:
+    name: Build Windows Portable
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Enable Windows Desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Ensure Windows Platform Files
+        working-directory: frontend
+        run: flutter create . --platforms=windows
+
+      - name: Get Dependencies
+        working-directory: frontend
+        run: flutter pub get
+
+      - name: Apply Custom Windows App Icon
+        working-directory: frontend
+        run: dart run flutter_launcher_icons --file flutter_launcher_icons_windows.yaml
+
+      - name: Build Windows Release
+        working-directory: frontend
+        run: flutter build windows --release --dart-define=API_BASE_URL=https://to-do-list-backend-yrwf.onrender.com
+
+      - name: Create Portable ZIP
+        shell: pwsh
+        run: |
+          $releaseDir = "frontend/build/windows/x64/runner/Release"
+          $zipPath = "frontend/build/windows/x64/runner/cross_todo-portable-win64.zip"
+          $portableDir = "frontend/build/windows/x64/runner/portable"
+          if (Test-Path $zipPath) { Remove-Item $zipPath -Force }
+          if (Test-Path $portableDir) { Remove-Item $portableDir -Recurse -Force }
+          New-Item -ItemType Directory -Path $portableDir | Out-Null
+          Copy-Item "$releaseDir\*" -Destination $portableDir -Recurse -Force
+          Copy-Item "README_USER_WINDOWS.txt" -Destination "$portableDir\README_USER_WINDOWS.txt" -Force
+          Compress-Archive -Path "$portableDir\*" -DestinationPath $zipPath
+
+      - name: Upload Windows Portable Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: cross_todo-portable-win64
+          path: frontend/build/windows/x64/runner/cross_todo-portable-win64.zip
+          if-no-files-found: error
+
   android:
     name: Build Android APK
     runs-on: ubuntu-latest
@@ -123,3 +179,25 @@ jobs:
           issuer-id: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
           api-key-id: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
           api-private-key: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY }}
+
+  publish_release:
+    name: Publish GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [windows, android, macos]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: release-assets
+          merge-multiple: true
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Cross Todo ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            release-assets/cross_todo-portable-win64.zip
+            release-assets/cross_todo-macos.zip
+            release-assets/app-release.apk

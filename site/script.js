@@ -26,6 +26,19 @@ if (LINKS.iosTestFlight) {
   ios.querySelector("span").textContent = "TestFlight";
 }
 
+function disableDownload(link, message) {
+  link.classList.add("disabled");
+  link.setAttribute("aria-disabled", "true");
+  link.removeAttribute("href");
+  link.querySelector("span").textContent = message;
+}
+
+function enableDownload(link, url) {
+  link.classList.remove("disabled");
+  link.removeAttribute("aria-disabled");
+  link.href = url;
+}
+
 function findAssetUrl(assets, platform) {
   const patterns = {
     windows: [/portable.*win.*zip/i, /win.*portable.*zip/i, /windows.*zip/i],
@@ -54,14 +67,31 @@ async function hydrateReleaseLinks() {
     const macAsset = findAssetUrl(assets, "macos");
     const androidAsset = findAssetUrl(assets, "android");
 
-    if (windowsAsset) win.href = windowsAsset;
-    if (macAsset) mac.href = macAsset;
-    if (androidAsset) android.href = androidAsset;
+    if (windowsAsset) {
+      enableDownload(win, windowsAsset);
+    } else {
+      disableDownload(win, "Файл появится в Release");
+    }
+
+    if (macAsset) {
+      enableDownload(mac, macAsset);
+    } else {
+      disableDownload(mac, "Файл появится в Release");
+    }
+
+    if (androidAsset) {
+      enableDownload(android, androidAsset);
+    } else {
+      disableDownload(android, "Файл появится в Release");
+    }
 
     const releaseName = release.name || release.tag_name || "последнего релиза";
     releaseInfo.textContent = `Ссылки обновлены из ${releaseName}.`;
   } catch (_err) {
-    releaseInfo.textContent = "Не удалось получить релиз автоматически, используются стандартные ссылки.";
+    disableDownload(win, "Release ещё не опубликован");
+    disableDownload(mac, "Release ещё не опубликован");
+    disableDownload(android, "Release ещё не опубликован");
+    releaseInfo.textContent = "Release с файлами ещё не опубликован. После выпуска версии ссылки появятся автоматически.";
   }
 }
 
